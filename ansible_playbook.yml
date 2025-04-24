@@ -46,19 +46,12 @@
     args:
       creates: "/var/lib/pgsql/{{ postgresql_version }}/data/PG_VERSION"
 
-  - name: Start PostgreSQL service
-    systemd:
-      name: postgresql-{{ postgresql_version }}
-      state: started
-      enabled: yes 
-
   - name: Ensure listen_addresses is set to '*'
     lineinfile:
       path: /var/lib/pgsql/{{ postgresql_version }}/data/postgresql.conf
       regexp: '^#?listen_addresses ='
       line: "listen_addresses = '*'"
       state: present
-    notify: restart postgres
 
   - name: Allow md5 connections for all other addresses
     postgresql_pg_hba:
@@ -68,7 +61,12 @@
       users: all
       address: 0.0.0.0/0
       method: md5
-    notify: restart postgres
+    
+  - name: Start PostgreSQL service
+    systemd:
+      name: postgresql-{{ postgresql_version }}
+      state: started
+      enabled: yes 
   
   - name: Create db user
     postgresql_user:
@@ -99,11 +97,6 @@
     become_user: postgres
 
   handlers:
-
-  - name: restart postgres
-    systemd:
-      name: postgresql-{{ postgresql_version }}
-      state: restarted
 
   - name: Reboot firewalld
     systemd:

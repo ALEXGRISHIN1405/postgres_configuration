@@ -1,0 +1,39 @@
+---
+- name: Test connection
+  hosts: server
+  become: yes
+  vars:
+    - db_user: first_user
+    - db_password: first_user
+    - db_name: first_db
+
+  tasks:
+
+  - name: Create db user
+    postgresql_user:
+      state: present
+      name: "{{ db_user }}"
+      password: "{{ db_password }}"
+      login_password: "postgres"
+    become: yes
+    become_user: postgres
+
+  - name: Create database
+    postgresql_db:
+      state: present
+      name: "{{ db_name }}"
+      login_password: "postgres"
+    become: yes
+    become_user: postgres
+
+  - name: Grant db user access to app db
+    postgresql_privs:
+      type: database
+      database: "{{ db_name }}"
+      roles: "{{ db_user }}"
+      grant_option: true
+      privs: all
+      login_password: "postgres"
+    become: yes
+    become_user: postgres
+

@@ -1,2 +1,2 @@
 [server]
-192.168.31.169 ansible_ssh_user=alex ansible_ssh_pass=123 ansible_become_pass=123
+192.168.0.25 ansible_ssh_user=alex ansible_ssh_pass=123 ansible_become_pass=123

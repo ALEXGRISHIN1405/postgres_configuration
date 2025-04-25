@@ -1,0 +1,74 @@
+---
+- name: Configure RedOS
+  hosts: server
+  become: yes
+  vars:
+    - postgresql_version: 17
+
+  tasks:
+
+  - name: Add PostgreSQL repository
+    yum_repository:
+      name: "postgresql"
+      description: "PostgreSQL Repository"
+      baseurl: "https://download.postgresql.org/pub/repos/yum/{{ postgresql_version }}/redhat/rhel-9-x86_64"
+      gpgkey: "https://download.postgresql.org/pub/repos/yum/keys/PGDG-RPM-GPG-KEY-RHEL"
+      enabled: yes
+      state: present
+
+  - name: Install PostgreSQL {{ postgresql_version }} server
+    ansible.builtin.dnf:
+      name: postgresql{{ postgresql_version }}-server
+      state: present
+
+  - name: Install pip3
+    yum:
+      name: python3-pip
+      state: present
+
+  - name: Install Python packages
+    pip: "name={{ item }} state=present"
+    with_items:
+      - psycopg2-binary
+
+  - name: Configure firewalld for Postgresql {{ postgresql_version }}
+    firewalld:
+      service: postgresql
+      permanent: yes
+      state: enabled
+    notify: Reboot firewalld
+
+  - name: Initialize the PostgreSQL database
+    command: "/usr/pgsql-{{ postgresql_version }}/bin/postgresql-{{ postgresql_version }}-setup initdb"
+    args:
+      creates: "/var/lib/pgsql/{{ postgresql_version }}/data/PG_VERSION"
+
+  - name: Ensure listen_addresses is set to '*'
+    lineinfile:
+      path: /var/lib/pgsql/{{ postgresql_version }}/data/postgresql.conf
+      regexp: '^#?listen_addresses ='
+      line: "listen_addresses = '*'"
+      state: present
+
+  - name: Allow md5 connections for all other addresses
+    postgresql_pg_hba:
+      dest: /var/lib/pgsql/{{ postgresql_version }}/data/pg_hba.conf
+      contype: host
+      databases: all
+      users: all
+      address: 0.0.0.0/0
+      method: md5
+    
+  - name: Start PostgreSQL service
+    systemd:
+      name: postgresql-{{ postgresql_version }}
+      state: started
+      enabled: yes 
+  
+  handlers:
+
+  - name: Reboot firewalld
+    systemd:
+      name: firewalld
+      state: restarted
+

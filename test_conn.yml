@@ -9,6 +9,16 @@
 
   tasks:
 
+  - name: Check if PostgreSQL is already installed
+    command: "psql --version"
+    register: psql_version
+    ignore_errors: yes
+
+  - name: Fail if PostgreSQL is not installed
+    fail:
+      msg: "PostgreSQL is not installed. Exiting the playbook."
+    when: psql_version.rc != 0
+
   - name: Create db user
     postgresql_user:
       state: present

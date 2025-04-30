@@ -34,7 +34,7 @@
 **Метрики:**
 1. pg_postmaster_start_time_seconds - эта метрика показывает, когда был запущен основной процесс PostgreSQL, alert если резко упало (значит PostgreSQL был перезапущен)
 2. sum(pg_stat_database_xact_rollback)/sum(pg_stat_database_xact_commit)*100 - отношение количества транзакций, которые были отменены, к количеству транзакций, которые были выполнены, alert при значении больше 50%
-3. ((sum (pg_locks_count)) / (pg_settings_max_locks_per_transaction * pg_settings_max_connections)) * 100 - отношение количества блокировок к произведению максимальному числу блокировок в одной транзакции на количество подключений, alert при достижении 30%
+3. ((sum (pg_locks_count)) / (pg_settings_max_locks_per_transaction * pg_settings_max_connections)) * 100 - отношение количества блокировок к произведению максимального числа блокировок в одной транзакции на количество подключений, alert при достижении 30%
 4. (sum(pg_stat_activity_count) / sum(pg_settings_max_connections)) * 100 - отношение количества текущих подключений, к количеству максимальных подключений, alert при достижении 80%
 5. sum(rate(pg_stat_statements_calls[1m])) - количество запросов в минуту, alert при резком увеличении в 2 раза
 6. sum(rate(pg_stat_statements_mean_time_seconds[1m])) - среднее время выполнения запроса в милисикундах за минуту

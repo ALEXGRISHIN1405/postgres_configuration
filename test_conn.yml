@@ -25,7 +25,6 @@
       name: "{{ db_user }}"
       password: "{{ db_password }}"
       login_password: "postgres"
-    become: yes
     become_user: postgres
 
   - name: Create database
@@ -33,7 +32,6 @@
       state: present
       name: "{{ db_name }}"
       login_password: "postgres"
-    become: yes
     become_user: postgres
 
   - name: Grant db user access to app db
@@ -44,6 +42,5 @@
       grant_option: true
       privs: all
       login_password: "postgres"
-    become: yes
     become_user: postgres
 
